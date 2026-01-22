@@ -1,36 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Studio 730 - Project Tracker
+
+A web application for tracking Studio 730 Thursday 7:30 gatherings, where members can log their activities and leave comments.
+
+## Features
+
+- ✅ **Email verification (magic links)** - No passwords needed! Just enter your email and click the link sent to your inbox
+- ✅ User profile management (nickname, first/last name, city, country, bio)
+- ✅ Create records with date, city, and activity description
+- ✅ View all records in a dashboard
+- ✅ Comment on records
+- ✅ Modern, responsive UI
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ installed
+- npm or yarn
+
+### Installation
+
+1. Navigate to the project directory:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd studio730-app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies (if not already installed):
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+The `.env.local` file should already be created with:
+```
+DATABASE_URL="file:./dev.db"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-key-change-this-in-production"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Email Configuration**: You need to configure SMTP settings for email verification. See `EMAIL_SETUP.md` for details.
 
-## Learn More
+For quick testing, you can use Ethereal Email (free testing service):
+- Visit https://ethereal.email/ to create a test account
+- Add SMTP credentials to your `.env.local`
 
-To learn more about Next.js, take a look at the following resources:
+**Important**: Change `NEXTAUTH_SECRET` to a secure random string in production.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Generate Prisma Client and run migrations:
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Running the Application
 
-## Deploy on Vercel
+1. Start the development server:
+```bash
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. Sign up or log in by entering your email address - you'll receive a magic link!
+
+## Usage
+
+1. **Sign Up/Login**: Enter your email address. You'll receive a magic link via email (no password needed!)
+2. **Click the Magic Link**: Check your email and click the link to sign in
+3. **Set Profile**: Update your profile with nickname, name, location, and bio
+4. **Create Records**: Add records of what you did during Studio 730 sessions
+5. **View Dashboard**: See all records from all members
+6. **Comment**: Leave comments on any record
+
+## Project Structure
+
+```
+studio730-app/
+├── app/
+│   ├── api/              # API routes
+│   │   ├── auth/         # Authentication endpoints
+│   │   ├── records/      # Record CRUD
+│   │   ├── comments/     # Comment creation
+│   │   └── profile/      # Profile management
+│   ├── login/            # Login page (email only)
+│   ├── signup/           # Sign up page (email only)
+│   ├── verify-email/     # Email verification page
+│   ├── create-record/    # Create record page
+│   ├── profile/          # Profile page
+│   └── page.tsx          # Dashboard (home page)
+├── components/           # React components
+├── lib/                  # Utilities (Prisma, Auth)
+├── prisma/               # Database schema and migrations
+└── types/                # TypeScript type definitions
+```
+
+## Database
+
+The application uses SQLite for development (can be easily switched to PostgreSQL for production).
+
+To view the database:
+```bash
+npx prisma studio
+```
+
+## Technologies Used
+
+- **Next.js 16** - React framework
+- **TypeScript** - Type safety
+- **NextAuth.js** - Authentication with email verification
+- **Prisma** - Database ORM
+- **SQLite** - Database
+- **Tailwind CSS** - Styling
+- **Nodemailer** - Email sending
+
+## Production Deployment
+
+Before deploying to production:
+
+1. Change `NEXTAUTH_SECRET` to a secure random string
+2. Update `NEXTAUTH_URL` to your production domain
+3. Configure production SMTP settings (see `EMAIL_SETUP.md`)
+4. Consider switching to PostgreSQL for the database
+5. Set up proper environment variables in your hosting platform
+
+## License
+
+MIT
