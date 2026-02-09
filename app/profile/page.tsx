@@ -159,32 +159,32 @@ function ProfilePageContent() {
     : "U"
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC]">
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-10 animate-fade-in">
           <div className="flex items-center gap-6 mb-6">
             <div className="relative">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg ring-4 ring-white">
+              <div className="w-20 h-20 rounded-2xl bg-[#5C7C5C] flex items-center justify-center text-white text-2xl font-bold shadow-lg ring-4 ring-white">
                 {initials}
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white shadow-sm"></div>
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#6B8E6A] rounded-full border-4 border-white shadow-sm"></div>
             </div>
             <div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight mb-2">
+              <h1 className="text-5xl font-bold text-[#5C7C5C] tracking-tight mb-2">
                 {isSetup ? "Welcome!" : displayName}
               </h1>
               {!isSetup && (
-                <p className="text-gray-600 text-lg font-medium">{session.user.email}</p>
+                <p className="text-[#6B8E6A] text-lg font-medium">{session.user.email}</p>
               )}
             </div>
           </div>
-          {!isSetup && <p className="text-gray-500 text-base ml-26">Manage your account settings</p>}
+          {!isSetup && <p className="text-[#6B8E6A] text-base ml-26">Manage your account settings</p>}
         </div>
         
         {isSetup && (
           <div className="mb-8 animate-slide-in">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 shadow-xl">
+            <div className="bg-[#5C7C5C] rounded-2xl p-6 shadow-xl">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
@@ -202,15 +202,15 @@ function ProfilePageContent() {
           </div>
         )}
 
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-8 sm:p-10 animate-fade-in">
-          <div className="mb-8 pb-8 border-b border-gray-200/60">
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-[#5C7C5C]/10 p-8 sm:p-10 animate-fade-in">
+          <div className="mb-8 pb-8 border-b border-[#5C7C5C]/20">
             <div className="flex items-center gap-3 mb-2">
-              <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Email Address</p>
+              <p className="text-xs font-semibold text-[#6B8E6A] uppercase tracking-wider">Email Address</p>
             </div>
-            <p className="text-xl font-bold text-gray-900 ml-8">{session.user.email}</p>
+            <p className="text-xl font-bold text-[#5C7C5C] ml-8">{session.user.email}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-7">
@@ -228,21 +228,21 @@ function ProfilePageContent() {
             )}
 
             {success && (
-              <div className="bg-gradient-to-r from-green-50 to-emerald-100 border-l-4 border-green-500 rounded-r-xl px-5 py-4 flex items-start gap-3 shadow-sm animate-slide-in">
+              <div className="bg-gradient-to-r from-[#5C7C5C]/10 to-[#6B8E6A]/10 border-l-4 border-[#5C7C5C] rounded-r-xl px-5 py-4 flex items-start gap-3 shadow-sm animate-slide-in">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-[#5C7C5C] rounded-lg flex items-center justify-center">
                     <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   </div>
                 </div>
-                <span className="text-sm font-medium text-green-800 pt-1">{success}</span>
+                <span className="text-sm font-medium text-[#5C7C5C] pt-1">{success}</span>
               </div>
             )}
 
             <div className="group">
               <label htmlFor="nickname" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Nickname {isSetup && <span className="text-red-500">*</span>}
@@ -254,7 +254,7 @@ function ProfilePageContent() {
                 value={formData.nickname || ""}
                 onChange={handleChange}
                 required={isSetup}
-                className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-900 placeholder-gray-400 bg-gray-50/50 hover:bg-white hover:border-gray-300"
+                className="w-full px-5 py-4 border-2 border-[#5C7C5C]/20 rounded-xl focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] transition-all duration-200 text-[#5C7C5C] placeholder-[#6B8E6A]/50 bg-white/80 hover:bg-white hover:border-[#5C7C5C]/40"
                 placeholder="Choose a nickname"
               />
               {isSetup && (
@@ -365,7 +365,7 @@ function ProfilePageContent() {
             <button
               type="submit"
               disabled={loading || (isSetup && !formData.nickname?.trim())}
-              className="group relative w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 px-8 rounded-xl hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-bold text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
+              className="group relative w-full bg-[#5C7C5C] text-white py-4 px-8 rounded-xl hover:bg-[#4A654A] focus:outline-none focus:ring-4 focus:ring-[#5C7C5C]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-bold text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
                 {loading ? (

@@ -89,7 +89,7 @@ export default function CreateRecordPage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC]">
         <Navbar />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="animate-pulse">
@@ -113,17 +113,17 @@ export default function CreateRecordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC]">
       <Navbar />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-10 animate-fade-in">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight mb-3">
+          <h1 className="text-5xl font-bold text-[#5C7C5C] tracking-tight mb-3">
             Create New Record
           </h1>
-          <p className="text-gray-600 text-xl font-medium">Share your Studio 730 experience</p>
+          <p className="text-[#6B8E6A] text-xl font-medium">Share your Studio 730 experience</p>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-8 sm:p-10 animate-fade-in">
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-[#5C7C5C]/10 p-8 sm:p-10 animate-fade-in">
           <form onSubmit={handleSubmit} className="space-y-7">
             {error && (
               <div className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 rounded-r-xl px-5 py-4 flex items-start gap-3 shadow-sm animate-slide-in">
@@ -140,7 +140,7 @@ export default function CreateRecordPage() {
 
             <div className="group">
               <label htmlFor="date" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 Date <span className="text-red-500">*</span>
@@ -152,13 +152,13 @@ export default function CreateRecordPage() {
                 value={formData.date}
                 onChange={handleChange}
                 required
-                className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-900 bg-gray-50/50 hover:bg-white hover:border-gray-300"
+                className="w-full px-5 py-4 border-2 border-[#5C7C5C]/20 rounded-xl focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] transition-all duration-200 text-[#5C7C5C] bg-white/80 hover:bg-white hover:border-[#5C7C5C]/40"
               />
             </div>
 
             <div className="group">
               <label htmlFor="gathering" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 Gathering <span className="text-red-500">*</span>
@@ -169,7 +169,7 @@ export default function CreateRecordPage() {
                 value={formData.gathering}
                 onChange={handleChange}
                 required
-                className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white transition-all duration-200 text-gray-900 hover:bg-gray-50 hover:border-gray-300"
+                className="w-full px-5 py-4 border-2 border-[#5C7C5C]/20 rounded-xl focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] bg-white transition-all duration-200 text-[#5C7C5C] hover:bg-[#F5F5EC] hover:border-[#5C7C5C]/40"
               >
                 <option value="">Select a gathering</option>
                 {gatherings.map((gathering) => (
@@ -182,7 +182,7 @@ export default function CreateRecordPage() {
 
             <div className="group">
               <label htmlFor="content" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
                 What did you do in Studio 730? <span className="text-red-500">*</span>
@@ -195,7 +195,7 @@ export default function CreateRecordPage() {
                 required
                 rows={8}
                 placeholder="Describe what you did during the Studio 730 session..."
-                className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-900 placeholder-gray-400 resize-y bg-gray-50/50 hover:bg-white hover:border-gray-300"
+                className="w-full px-5 py-4 border-2 border-[#5C7C5C]/20 rounded-xl focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] transition-all duration-200 text-[#5C7C5C] placeholder-[#6B8E6A]/50 resize-y bg-white/80 hover:bg-white hover:border-[#5C7C5C]/40"
               />
             </div>
 
@@ -203,7 +203,7 @@ export default function CreateRecordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 px-8 rounded-xl hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-bold text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
+                className="group relative flex-1 bg-[#5C7C5C] text-white py-4 px-8 rounded-xl hover:bg-[#4A654A] focus:outline-none focus:ring-4 focus:ring-[#5C7C5C]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-bold text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   {loading ? (

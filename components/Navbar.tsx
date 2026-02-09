@@ -36,46 +36,46 @@ export default function Navbar() {
     : "U"
 
   return (
-    <nav className="bg-white/80 backdrop-blur-xl border-b border-gray-200/60 shadow-sm sticky top-0 z-50">
+    <nav className="bg-white/90 backdrop-blur-xl border-b border-[#5C7C5C]/10 shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center gap-8">
-            <Link href="/" className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent hover:from-indigo-700 hover:to-purple-700 transition-all duration-200">
+            <Link href="/" className="text-xl font-bold text-[#5C7C5C] hover:text-[#4A654A] transition-all duration-200">
               Studio 730
             </Link>
             <div className="hidden md:flex gap-2">
               <Link
                 href="/"
-                className="text-gray-700 hover:text-indigo-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-indigo-50"
+                className="text-[#6B8E6A] hover:text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-[#5C7C5C]/10"
               >
                 Dashboard
               </Link>
               <Link
                 href="/create-record"
-                className="text-gray-700 hover:text-indigo-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-indigo-50"
+                className="text-[#6B8E6A] hover:text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-[#5C7C5C]/10"
               >
                 Add Record
               </Link>
               <Link
                 href="/profile"
-                className="text-gray-700 hover:text-indigo-600 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-indigo-50"
+                className="text-[#6B8E6A] hover:text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-[#5C7C5C]/10"
               >
                 Profile
               </Link>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+            <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl bg-[#F5F5EC] hover:bg-[#5C7C5C]/10 transition-colors">
+              <div className="w-8 h-8 rounded-lg bg-[#5C7C5C] flex items-center justify-center text-white text-xs font-bold">
                 {initials}
               </div>
-              <span className="text-sm font-semibold text-gray-700">
+              <span className="text-sm font-semibold text-[#5C7C5C]">
                 {displayName}
               </span>
             </div>
             <button
               onClick={handleSignOut}
-              className="bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-800 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow"
+              className="bg-[#F5F5EC] hover:bg-[#5C7C5C]/10 text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow border border-[#5C7C5C]/20"
             >
               Sign Out
             </button>

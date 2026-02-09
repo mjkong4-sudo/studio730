@@ -43,12 +43,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-indigo-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC] px-4 py-12">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 sm:p-10">
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-[#5C7C5C]/10 p-8 sm:p-10">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">Studio 730</h1>
-            <p className="text-gray-600">Sign in with your email</p>
+            <h1 className="text-3xl font-bold text-[#5C7C5C] tracking-tight mb-2">Studio 730</h1>
+            <p className="text-[#6B8E6A]">Sign in with your email</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -62,7 +62,7 @@ export default function LoginPage() {
             )}
             
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-[#5C7C5C] mb-2">
                 Email address
               </label>
               <input
@@ -71,10 +71,10 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3 border border-[#5C7C5C]/30 rounded-lg focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] transition-colors text-[#5C7C5C] placeholder-[#6B8E6A]/50"
                 placeholder="your@email.com"
               />
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-[#6B8E6A]">
                 No password required. We'll send you a magic link.
               </p>
             </div>
@@ -82,7 +82,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold shadow-sm hover:shadow-md"
+              className="w-full bg-[#5C7C5C] text-white py-3 px-4 rounded-lg hover:bg-[#4A654A] focus:outline-none focus:ring-2 focus:ring-[#5C7C5C] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold shadow-sm hover:shadow-md"
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -98,10 +98,10 @@ export default function LoginPage() {
             </button>
           </form>
           
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-center text-sm text-gray-600">
+          <div className="mt-6 pt-6 border-t border-[#5C7C5C]/20">
+            <p className="text-center text-sm text-[#6B8E6A]">
               Don't have an account?{" "}
-              <a href="/signup" className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
+              <a href="/signup" className="text-[#5C7C5C] hover:text-[#4A654A] font-semibold transition-colors">
                 Sign up
               </a>
             </p>
