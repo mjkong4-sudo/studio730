@@ -10,11 +10,6 @@ import { createErrorResponse, ApiError, ErrorCodes } from "@/lib/api-error"
 const getRateLimit = createRateLimitMiddleware({ limit: 60, window: 60 * 1000 })
 const postRateLimit = createRateLimitMiddleware({ limit: 10, window: 60 * 1000 })
 
-// Handle CORS preflight requests
-export async function OPTIONS(request: Request) {
-  return handleCorsPreflight(request) || new NextResponse(null, { status: 200 })
-}
-
 export async function GET(request: Request) {
   // Handle CORS preflight
   const corsResponse = handleCorsPreflight(request)
