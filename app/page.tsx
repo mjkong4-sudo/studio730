@@ -109,50 +109,64 @@ export default function HomePage() {
         ...(searchQuery.trim() && { search: searchQuery.trim() })
       })
       
-      console.log("Fetching records with params:", params.toString())
+      console.log("🔍 Fetching records with params:", params.toString())
       const response = await fetch(`/api/records?${params}`)
       
       if (!response.ok) {
-        console.error("API response not OK:", response.status, response.statusText)
+        console.error("❌ API response not OK:", response.status, response.statusText)
+        const errorText = await response.text()
+        console.error("Error response:", errorText)
         throw new Error(`API error: ${response.status}`)
       }
       
       const data = await response.json()
-      console.log("Records API response:", { 
+      console.log("✅ Records API response:", { 
         recordsCount: data.records?.length || 0, 
         pagination: data.pagination,
-        hasRecords: !!data.records 
+        hasRecords: !!data.records,
+        firstRecord: data.records?.[0] ? {
+          id: data.records[0].id,
+          content: data.records[0].content?.substring(0, 50),
+          date: data.records[0].date
+        } : null
       })
       
       if (data.records && Array.isArray(data.records)) {
-        console.log("Setting records:", data.records.length, "records")
+        console.log("📝 Setting records:", data.records.length, "records")
         if (append) {
-          setRecords(prev => Array.isArray(prev) ? [...prev, ...data.records] : data.records)
+          setRecords(prev => {
+            const newRecords = Array.isArray(prev) ? [...prev, ...data.records] : data.records
+            console.log("📦 Appended records, total:", newRecords.length)
+            return newRecords
+          })
         } else {
+          console.log("📦 Setting records directly:", data.records.length)
           setRecords(data.records)
         }
         setHasMore(data.pagination?.hasMore || false)
         setTotalCount(data.pagination?.totalCount || data.records.length)
+        console.log("✅ Records state updated. Total count:", data.pagination?.totalCount || data.records.length)
       } else if (Array.isArray(data)) {
         // Fallback for old API format
-        console.log("Using fallback format, records:", data.length)
+        console.log("⚠️ Using fallback format, records:", data.length)
         setRecords(data)
         setHasMore(false)
         setTotalCount(data.length)
       } else {
         // Invalid response format, set empty array
-        console.warn("Invalid response format:", data)
+        console.warn("❌ Invalid response format:", data)
         setRecords([])
         setHasMore(false)
         setTotalCount(0)
       }
     } catch (error) {
-      console.error("Error fetching records:", error)
+      console.error("❌ Error fetching records:", error)
       setRecords([])
       setHasMore(false)
       setTotalCount(0)
     } finally {
       setLoading(false)
+      console.log("🏁 fetchRecords completed, loading set to false")
     }
   }
 
