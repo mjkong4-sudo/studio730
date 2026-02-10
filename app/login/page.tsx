@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation"
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -18,6 +20,7 @@ export default function LoginPage() {
     try {
       const result = await signIn("credentials", {
         email,
+        password,
         redirect: false,
       })
 
@@ -28,7 +31,7 @@ export default function LoginPage() {
         // Provide user-friendly error messages
         let errorMessage = "Failed to sign in. Please try again."
         if (result.error === "CredentialsSignin") {
-          errorMessage = "Invalid email or authentication failed. Please check your email and try again."
+          errorMessage = "Invalid email or password. Please check your credentials and try again."
         } else if (result.error.includes("blocked")) {
           errorMessage = "Your account has been blocked. Please contact support."
         } else if (result.error) {
@@ -57,7 +60,7 @@ export default function LoginPage() {
         <div className="glass-enhanced rounded-3xl shadow-brand-xl border-2 border-[#5C7C5C]/15 p-10 sm:p-12">
           <div className="text-center mb-10">
             <h1 className="text-4xl md:text-5xl font-bold text-gradient-brand tracking-tighter mb-4 leading-tight">Studio 730</h1>
-            <p className="text-[#6B8E6A] text-lg md:text-xl font-medium leading-relaxed">Sign in with your email</p>
+            <p className="text-[#6B8E6A] text-lg md:text-xl font-medium leading-relaxed">Sign in to your account</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-7">
@@ -72,7 +75,7 @@ export default function LoginPage() {
             
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-[#5C7C5C] mb-2 tracking-wide uppercase">
-                Email address
+                Email address <span className="text-red-500">*</span>
               </label>
               <input
                 id="email"
@@ -83,9 +86,40 @@ export default function LoginPage() {
                 className="input-enhanced py-3"
                 placeholder="your@email.com"
               />
-              <p className="mt-2 text-sm text-[#6B8E6A]">
-                No password required. We'll send you a magic link.
-              </p>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold text-[#5C7C5C] mb-2 tracking-wide uppercase">
+                Password <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="input-enhanced py-3 pr-12"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#5C7C5C] hover:text-[#4A654A] transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0A9.97 9.97 0 015.12 5.12m3.29 3.29L12 12m-3.29-3.29L12 12m0 0l3.29 3.29M12 12l3.29-3.29m-3.29 3.29l-3.29 3.29" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
             
             <button

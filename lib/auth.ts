@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "./prisma"
+import { verifyPassword } from "./password"
 import type { User } from "next-auth"
 
 export const authOptions: NextAuthOptions = {
@@ -8,9 +9,10 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
   providers: [
     CredentialsProvider({
-      name: "Email",
+      name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" }
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
         try {
@@ -19,45 +21,52 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Email is required")
           }
 
+          if (!credentials?.password) {
+            console.error("No password provided")
+            throw new Error("Password is required")
+          }
+
           const email = credentials.email.toLowerCase().trim()
+          const password = credentials.password
+
           console.log("Attempting to authorize:", email)
 
-          // Find or create user
-          let user = await prisma.user.findUnique({
+          // Find user
+          const user = await prisma.user.findUnique({
             where: { email },
             select: {
               id: true,
               email: true,
+              password: true,
               nickname: true,
               blocked: true,
             }
           })
 
           if (!user) {
-            console.log("User not found, creating new user:", email)
-            // Create new user automatically
-            user = await prisma.user.create({
-              data: {
-                email,
-                emailVerified: new Date(), // Mark as verified since we're skipping verification
-              },
-              select: {
-                id: true,
-                email: true,
-                nickname: true,
-                blocked: true,
-              }
-            })
-            console.log("User created:", user.id)
-          } else {
-            console.log("User found:", user.id)
-            
-            // Check if user is blocked
-            if (user.blocked) {
-              console.error("User is blocked:", email)
-              throw new Error("Your account has been blocked. Please contact support.")
-            }
+            console.error("User not found:", email)
+            throw new Error("Invalid email or password")
           }
+
+          // Check if user is blocked
+          if (user.blocked) {
+            console.error("User is blocked:", email)
+            throw new Error("Your account has been blocked. Please contact support.")
+          }
+
+          // Verify password
+          if (!user.password) {
+            console.error("User has no password set:", email)
+            throw new Error("Please set up a password for your account. Use the signup page.")
+          }
+
+          const isValidPassword = await verifyPassword(password, user.password)
+          if (!isValidPassword) {
+            console.error("Invalid password for user:", email)
+            throw new Error("Invalid email or password")
+          }
+
+          console.log("User authenticated successfully:", user.id)
 
           const authUser: User = {
             id: user.id,
