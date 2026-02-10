@@ -140,11 +140,7 @@ export async function DELETE(request: Request) {
     }
 
     const body = await request.json()
-    const { password } = body
-
-    if (!password) {
-      throw new ApiError(400, "Password is required to delete your account", ErrorCodes.VALIDATION_ERROR)
-    }
+    const { password, confirmEmail } = body
 
     // Get user with password hash
     const user = await prisma.user.findUnique({
@@ -160,14 +156,27 @@ export async function DELETE(request: Request) {
       throw new ApiError(404, "User not found", ErrorCodes.NOT_FOUND)
     }
 
-    // Verify password
-    if (!user.password) {
-      throw new ApiError(400, "Account has no password set. Cannot verify identity.", ErrorCodes.VALIDATION_ERROR)
-    }
+    // Handle accounts with passwords
+    if (user.password) {
+      if (!password) {
+        throw new ApiError(400, "Password is required to delete your account", ErrorCodes.VALIDATION_ERROR)
+      }
 
-    const isValidPassword = await verifyPassword(password, user.password)
-    if (!isValidPassword) {
-      throw new ApiError(401, "Invalid password", ErrorCodes.UNAUTHORIZED)
+      const isValidPassword = await verifyPassword(password, user.password)
+      if (!isValidPassword) {
+        throw new ApiError(401, "Invalid password", ErrorCodes.UNAUTHORIZED)
+      }
+    } else {
+      // Handle accounts without passwords (legacy accounts)
+      // Require email confirmation instead
+      if (!confirmEmail) {
+        throw new ApiError(400, "Email confirmation is required for accounts without passwords. Please enter your email address.", ErrorCodes.VALIDATION_ERROR)
+      }
+
+      const normalizedConfirmEmail = confirmEmail.toLowerCase().trim()
+      if (normalizedConfirmEmail !== user.email.toLowerCase()) {
+        throw new ApiError(400, "Email does not match your account email", ErrorCodes.VALIDATION_ERROR)
+      }
     }
 
     // Delete user (cascade will handle related records, comments, reactions, etc.)

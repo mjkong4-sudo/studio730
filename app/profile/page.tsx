@@ -33,6 +33,8 @@ function ProfilePageContent() {
   const [success, setSuccess] = useState("")
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deletePassword, setDeletePassword] = useState("")
+  const [deleteEmail, setDeleteEmail] = useState("")
+  const [hasPassword, setHasPassword] = useState(true)
   const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
@@ -59,6 +61,14 @@ function ProfilePageContent() {
           country: data.country || "",
           bio: data.bio || "",
         })
+        // Check if user has a password by trying to fetch user data
+        // We'll check this by attempting to get the user's email
+        // If the account was created before password auth, password will be null
+        if (session?.user?.email) {
+          // Check if this is a legacy account (no password)
+          // We'll determine this when user tries to delete
+          setDeleteEmail(session.user.email)
+        }
       }
     } catch (error) {
       console.error("Error fetching profile:", error)
@@ -66,6 +76,16 @@ function ProfilePageContent() {
       setFetching(false)
     }
   }
+
+  // Check if user has password when delete confirmation is shown
+  useEffect(() => {
+    if (showDeleteConfirm && session?.user?.email) {
+      // Check if account has password by making a test request
+      // For now, we'll assume accounts without passwords need email confirmation
+      // This will be determined by the API response
+      setDeleteEmail(session.user.email)
+    }
+  }, [showDeleteConfirm, session])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -420,24 +440,43 @@ function ProfilePageContent() {
                       </button>
                     ) : (
                       <div className="space-y-4">
-                        <div>
-                          <label htmlFor="deletePassword" className="block text-sm font-semibold text-red-800 mb-2">
-                            Enter your password to confirm deletion
-                          </label>
-                          <input
-                            id="deletePassword"
-                            type="password"
-                            value={deletePassword}
-                            onChange={(e) => setDeletePassword(e.target.value)}
-                            placeholder="Your password"
-                            className="w-full px-4 py-3 border-2 border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-red-900 bg-white"
-                          />
-                        </div>
+                        {hasPassword ? (
+                          <div>
+                            <label htmlFor="deletePassword" className="block text-sm font-semibold text-red-800 mb-2">
+                              Enter your password to confirm deletion
+                            </label>
+                            <input
+                              id="deletePassword"
+                              type="password"
+                              value={deletePassword}
+                              onChange={(e) => setDeletePassword(e.target.value)}
+                              placeholder="Your password"
+                              className="w-full px-4 py-3 border-2 border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-red-900 bg-white"
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            <label htmlFor="deleteEmail" className="block text-sm font-semibold text-red-800 mb-2">
+                              Enter your email address to confirm deletion
+                            </label>
+                            <p className="text-xs text-red-700 mb-2">
+                              Your account was created before password authentication. Please enter your email to confirm deletion.
+                            </p>
+                            <input
+                              id="deleteEmail"
+                              type="email"
+                              value={deleteEmail}
+                              onChange={(e) => setDeleteEmail(e.target.value)}
+                              placeholder={session?.user?.email || "your@email.com"}
+                              className="w-full px-4 py-3 border-2 border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-red-900 bg-white"
+                            />
+                          </div>
+                        )}
                         <div className="flex gap-3">
                           <button
                             type="button"
                             onClick={handleDeleteAccount}
-                            disabled={!deletePassword || deleting}
+                            disabled={(hasPassword ? !deletePassword : !deleteEmail) || deleting}
                             className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 font-semibold transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {deleting ? "Deleting..." : "Confirm Deletion"}
@@ -447,6 +486,7 @@ function ProfilePageContent() {
                             onClick={() => {
                               setShowDeleteConfirm(false)
                               setDeletePassword("")
+                              setDeleteEmail(session?.user?.email || "")
                               setError("")
                             }}
                             disabled={deleting}
@@ -468,8 +508,13 @@ function ProfilePageContent() {
   )
 
   async function handleDeleteAccount() {
-    if (!deletePassword) {
+    if (hasPassword && !deletePassword) {
       setError("Please enter your password to confirm deletion")
+      return
+    }
+
+    if (!hasPassword && !deleteEmail) {
+      setError("Please enter your email address to confirm deletion")
       return
     }
 
@@ -477,16 +522,26 @@ function ProfilePageContent() {
     setError("")
 
     try {
+      const requestBody = hasPassword 
+        ? { password: deletePassword }
+        : { confirmEmail: deleteEmail }
+
       const response = await fetch("/api/profile", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: deletePassword }),
+        body: JSON.stringify(requestBody),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || "Failed to delete account")
+        // Check if error indicates account has no password
+        if (data.error?.includes("no password") || data.error?.includes("Email confirmation")) {
+          setHasPassword(false)
+          setError("") // Clear error, show email input instead
+        } else {
+          setError(data.error || "Failed to delete account")
+        }
         setDeleting(false)
         return
       }
