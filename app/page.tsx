@@ -101,6 +101,7 @@ export default function HomePage() {
 
   const fetchRecords = async (pageNum: number = 1, append: boolean = false) => {
     try {
+      setLoading(true)
       const params = new URLSearchParams({
         page: pageNum.toString(),
         limit: "20",
@@ -108,10 +109,23 @@ export default function HomePage() {
         ...(searchQuery.trim() && { search: searchQuery.trim() })
       })
       
+      console.log("Fetching records with params:", params.toString())
       const response = await fetch(`/api/records?${params}`)
+      
+      if (!response.ok) {
+        console.error("API response not OK:", response.status, response.statusText)
+        throw new Error(`API error: ${response.status}`)
+      }
+      
       const data = await response.json()
+      console.log("Records API response:", { 
+        recordsCount: data.records?.length || 0, 
+        pagination: data.pagination,
+        hasRecords: !!data.records 
+      })
       
       if (data.records && Array.isArray(data.records)) {
+        console.log("Setting records:", data.records.length, "records")
         if (append) {
           setRecords(prev => Array.isArray(prev) ? [...prev, ...data.records] : data.records)
         } else {
@@ -121,11 +135,13 @@ export default function HomePage() {
         setTotalCount(data.pagination?.totalCount || data.records.length)
       } else if (Array.isArray(data)) {
         // Fallback for old API format
+        console.log("Using fallback format, records:", data.length)
         setRecords(data)
         setHasMore(false)
         setTotalCount(data.length)
       } else {
         // Invalid response format, set empty array
+        console.warn("Invalid response format:", data)
         setRecords([])
         setHasMore(false)
         setTotalCount(0)
