@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSessionHelper } from "@/lib/get-session"
 import { prisma } from "@/lib/prisma"
 import { sanitizeText, validateContentLength, CONTENT_LIMITS } from "@/lib/sanitize"
+import { verifyPassword } from "@/lib/password"
 import { createRateLimitMiddleware } from "@/lib/rate-limit"
 import { addSecurityHeaders, addCacheHeaders, handleCorsPreflight } from "@/lib/middleware"
 import { createErrorResponse, ApiError, ErrorCodes } from "@/lib/api-error"
@@ -118,6 +119,70 @@ export async function PUT(request: Request) {
     return addSecurityHeaders(response)
   } catch (error) {
     return addSecurityHeaders(createErrorResponse(error, "Failed to update profile"))
+  }
+}
+
+export async function DELETE(request: Request) {
+  // Handle CORS preflight
+  const corsResponse = handleCorsPreflight(request)
+  if (corsResponse) return corsResponse
+
+  // Apply rate limiting (very strict for deletion: 2 per hour)
+  const deleteRateLimit = createRateLimitMiddleware({ limit: 2, window: 60 * 60 * 1000 })
+  const rateLimitResponse = await deleteRateLimit(request)
+  if (rateLimitResponse) return addSecurityHeaders(rateLimitResponse)
+
+  try {
+    const session = await getServerSessionHelper()
+    
+    if (!session?.user?.id) {
+      throw new ApiError(401, "Unauthorized", ErrorCodes.UNAUTHORIZED)
+    }
+
+    const body = await request.json()
+    const { password } = body
+
+    if (!password) {
+      throw new ApiError(400, "Password is required to delete your account", ErrorCodes.VALIDATION_ERROR)
+    }
+
+    // Get user with password hash
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+      }
+    })
+
+    if (!user) {
+      throw new ApiError(404, "User not found", ErrorCodes.NOT_FOUND)
+    }
+
+    // Verify password
+    if (!user.password) {
+      throw new ApiError(400, "Account has no password set. Cannot verify identity.", ErrorCodes.VALIDATION_ERROR)
+    }
+
+    const isValidPassword = await verifyPassword(password, user.password)
+    if (!isValidPassword) {
+      throw new ApiError(401, "Invalid password", ErrorCodes.UNAUTHORIZED)
+    }
+
+    // Delete user (cascade will handle related records, comments, reactions, etc.)
+    await prisma.user.delete({
+      where: { id: session.user.id }
+    })
+
+    const response = NextResponse.json(
+      { message: "Account deleted successfully" },
+      { status: 200 }
+    )
+
+    return addSecurityHeaders(response)
+  } catch (error) {
+    return addSecurityHeaders(createErrorResponse(error, "Failed to delete account"))
   }
 }
 

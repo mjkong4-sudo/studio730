@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/Navbar"
@@ -31,6 +31,9 @@ function ProfilePageContent() {
   const [fetching, setFetching] = useState(true)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deletePassword, setDeletePassword] = useState("")
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -387,10 +390,115 @@ function ProfilePageContent() {
               </span>
             </button>
           </form>
+
+          {/* Delete Account Section */}
+          {!isSetup && (
+            <div className="mt-12 pt-12 border-t-2 border-red-200">
+              <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-2xl p-8 border-2 border-red-200">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-red-800 mb-2">Danger Zone</h3>
+                    <p className="text-red-700 text-sm mb-4">
+                      Once you delete your account, there is no going back. This will permanently delete your account, 
+                      all your records, comments, and reactions. This action cannot be undone.
+                    </p>
+                    
+                    {!showDeleteConfirm ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 font-semibold transition-colors shadow-md hover:shadow-lg"
+                      >
+                        Delete My Account
+                      </button>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="deletePassword" className="block text-sm font-semibold text-red-800 mb-2">
+                            Enter your password to confirm deletion
+                          </label>
+                          <input
+                            id="deletePassword"
+                            type="password"
+                            value={deletePassword}
+                            onChange={(e) => setDeletePassword(e.target.value)}
+                            placeholder="Your password"
+                            className="w-full px-4 py-3 border-2 border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-red-900 bg-white"
+                          />
+                        </div>
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={handleDeleteAccount}
+                            disabled={!deletePassword || deleting}
+                            className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 font-semibold transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {deleting ? "Deleting..." : "Confirm Deletion"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowDeleteConfirm(false)
+                              setDeletePassword("")
+                              setError("")
+                            }}
+                            disabled={deleting}
+                            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
+
+  async function handleDeleteAccount() {
+    if (!deletePassword) {
+      setError("Please enter your password to confirm deletion")
+      return
+    }
+
+    setDeleting(true)
+    setError("")
+
+    try {
+      const response = await fetch("/api/profile", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: deletePassword }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || "Failed to delete account")
+        setDeleting(false)
+        return
+      }
+
+      // Sign out and redirect to home
+      await signOut({ callbackUrl: "/" })
+    } catch (err) {
+      console.error("Delete account error:", err)
+      setError("An error occurred while deleting your account")
+      setDeleting(false)
+    }
+  }
 }
 
 export default function ProfilePage() {
