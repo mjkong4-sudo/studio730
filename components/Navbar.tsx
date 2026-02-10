@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import Notifications from "./Notifications"
 
 export default function Navbar() {
   const { data: session } = useSession()
@@ -40,33 +41,42 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center gap-8">
-            <Link href="/" className="text-xl font-bold text-[#5C7C5C] hover:text-[#4A654A] transition-all duration-200">
+            <Link href="/" className="font-display text-xl md:text-2xl font-bold text-gradient-subtle hover:text-gradient-brand transition-all duration-200 tracking-tight">
               Studio 730
             </Link>
             <div className="hidden md:flex gap-2">
               <Link
                 href="/"
-                className="text-[#6B8E6A] hover:text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-[#5C7C5C]/10"
+                className="text-[#6B8E6A] hover:text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold tracking-wide transition-all duration-200 hover:bg-[#5C7C5C]/10"
               >
                 Dashboard
               </Link>
               <Link
                 href="/create-record"
-                className="text-[#6B8E6A] hover:text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-[#5C7C5C]/10"
+                className="text-[#6B8E6A] hover:text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold tracking-wide transition-all duration-200 hover:bg-[#5C7C5C]/10"
               >
                 Add Record
               </Link>
               <Link
                 href="/profile"
-                className="text-[#6B8E6A] hover:text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-[#5C7C5C]/10"
+                className="text-[#6B8E6A] hover:text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold tracking-wide transition-all duration-200 hover:bg-[#5C7C5C]/10"
               >
                 Profile
               </Link>
+              {session.user.role === "admin" && (
+                <Link
+                  href="/admin"
+                  className="text-[#6B8E6A] hover:text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold tracking-wide transition-all duration-200 hover:bg-[#5C7C5C]/10"
+                >
+                  Admin
+                </Link>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Notifications />
             <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl bg-[#F5F5EC] hover:bg-[#5C7C5C]/10 transition-colors">
-              <div className="w-8 h-8 rounded-lg bg-[#5C7C5C] flex items-center justify-center text-white text-xs font-bold">
+              <div className="avatar-gradient w-8 h-8 rounded-lg flex items-center justify-center text-xs">
                 {initials}
               </div>
               <span className="text-sm font-semibold text-[#5C7C5C]">
@@ -75,7 +85,7 @@ export default function Navbar() {
             </div>
             <button
               onClick={handleSignOut}
-              className="bg-[#F5F5EC] hover:bg-[#5C7C5C]/10 text-[#5C7C5C] px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow border border-[#5C7C5C]/20"
+              className="btn-secondary px-4 py-2 text-sm"
             >
               Sign Out
             </button>

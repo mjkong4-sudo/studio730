@@ -159,7 +159,7 @@ function ProfilePageContent() {
     : "U"
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC]">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC] relative">
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-10 animate-fade-in">
@@ -171,15 +171,15 @@ function ProfilePageContent() {
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#6B8E6A] rounded-full border-4 border-white shadow-sm"></div>
             </div>
             <div>
-              <h1 className="text-5xl font-bold text-[#5C7C5C] tracking-tight mb-2">
+              <h1 className="text-5xl md:text-6xl font-bold text-gradient-brand tracking-tighter mb-3 leading-tight">
                 {isSetup ? "Welcome!" : displayName}
               </h1>
               {!isSetup && (
-                <p className="text-[#6B8E6A] text-lg font-medium">{session.user.email}</p>
+                <p className="text-[#6B8E6A] text-lg md:text-xl font-medium leading-relaxed">{session.user.email}</p>
               )}
             </div>
           </div>
-          {!isSetup && <p className="text-[#6B8E6A] text-base ml-26">Manage your account settings</p>}
+          {!isSetup && <p className="text-[#6B8E6A] text-lg ml-26 leading-relaxed">Manage your account settings</p>}
         </div>
         
         {isSetup && (
@@ -187,33 +187,33 @@ function ProfilePageContent() {
             <div className="bg-[#5C7C5C] rounded-2xl p-6 shadow-xl">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
+                      <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
                 </div>
                 <div>
-                  <p className="text-white font-bold text-lg mb-1">Welcome to Studio 730!</p>
-                  <p className="text-white/90 text-sm leading-relaxed">Please set up your profile first. Start by adding a nickname so others can identify you in posts.</p>
+                  <p className="text-white font-bold text-lg md:text-xl mb-2 tracking-tight">Welcome to Studio 730!</p>
+                  <p className="text-white/90 text-sm md:text-base leading-relaxed">Please set up your profile first. Start by adding a nickname so others can identify you in posts.</p>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-[#5C7C5C]/10 p-8 sm:p-10 animate-fade-in">
-          <div className="mb-8 pb-8 border-b border-[#5C7C5C]/20">
+        <div className="glass-enhanced rounded-3xl shadow-brand-xl border-2 border-[#5C7C5C]/15 p-10 sm:p-12 animate-fade-in relative z-10">
+          <div className="mb-10 pb-10 border-b-2 border-[#5C7C5C]/20">
             <div className="flex items-center gap-3 mb-2">
               <svg className="w-5 h-5 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               <p className="text-xs font-semibold text-[#6B8E6A] uppercase tracking-wider">Email Address</p>
             </div>
-            <p className="text-xl font-bold text-[#5C7C5C] ml-8">{session.user.email}</p>
+            <p className="text-xl md:text-2xl font-bold text-gradient-subtle ml-8 tracking-tight">{session.user.email}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-7">
+          <form onSubmit={handleSubmit} className="space-y-8">
             {error && (
               <div className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 rounded-r-xl px-5 py-4 flex items-start gap-3 shadow-sm animate-slide-in">
                 <div className="flex-shrink-0">
@@ -241,7 +241,7 @@ function ProfilePageContent() {
             )}
 
             <div className="group">
-              <label htmlFor="nickname" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
+              <label htmlFor="nickname" className="flex items-center gap-2 text-sm font-semibold text-[#5C7C5C] mb-3 tracking-wide uppercase">
                 <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
@@ -254,7 +254,7 @@ function ProfilePageContent() {
                 value={formData.nickname || ""}
                 onChange={handleChange}
                 required={isSetup}
-                className="w-full px-5 py-4 border-2 border-[#5C7C5C]/20 rounded-xl focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] transition-all duration-200 text-[#5C7C5C] placeholder-[#6B8E6A]/50 bg-white/80 hover:bg-white hover:border-[#5C7C5C]/40"
+                className="input-enhanced"
                 placeholder="Choose a nickname"
               />
               {isSetup && (
@@ -269,8 +269,8 @@ function ProfilePageContent() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="group">
-                <label htmlFor="firstName" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                  <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label htmlFor="firstName" className="flex items-center gap-2 text-sm font-semibold text-[#5C7C5C] mb-3 tracking-wide uppercase">
+                  <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   First Name
@@ -281,14 +281,14 @@ function ProfilePageContent() {
                   type="text"
                   value={formData.firstName || ""}
                   onChange={handleChange}
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-900 bg-gray-50/50 hover:bg-white hover:border-gray-300"
+                  className="w-full px-5 py-4 border-2 border-[#5C7C5C]/20 rounded-xl focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] transition-all duration-200 text-[#5C7C5C] bg-white/80 hover:bg-white hover:border-[#5C7C5C]/40"
                   placeholder="John"
                 />
               </div>
 
               <div className="group">
-                <label htmlFor="lastName" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                  <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label htmlFor="lastName" className="flex items-center gap-2 text-sm font-semibold text-[#5C7C5C] mb-3 tracking-wide uppercase">
+                  <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   Last Name
@@ -299,7 +299,7 @@ function ProfilePageContent() {
                   type="text"
                   value={formData.lastName || ""}
                   onChange={handleChange}
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-900 bg-gray-50/50 hover:bg-white hover:border-gray-300"
+                  className="w-full px-5 py-4 border-2 border-[#5C7C5C]/20 rounded-xl focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] transition-all duration-200 text-[#5C7C5C] bg-white/80 hover:bg-white hover:border-[#5C7C5C]/40"
                   placeholder="Doe"
                 />
               </div>
@@ -307,8 +307,8 @@ function ProfilePageContent() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="group">
-                <label htmlFor="city" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                  <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label htmlFor="city" className="flex items-center gap-2 text-sm font-semibold text-[#5C7C5C] mb-3 tracking-wide uppercase">
+                  <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -320,14 +320,14 @@ function ProfilePageContent() {
                   type="text"
                   value={formData.city || ""}
                   onChange={handleChange}
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-900 bg-gray-50/50 hover:bg-white hover:border-gray-300"
+                  className="w-full px-5 py-4 border-2 border-[#5C7C5C]/20 rounded-xl focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] transition-all duration-200 text-[#5C7C5C] bg-white/80 hover:bg-white hover:border-[#5C7C5C]/40"
                   placeholder="San Francisco"
                 />
               </div>
 
               <div className="group">
-                <label htmlFor="country" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                  <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label htmlFor="country" className="flex items-center gap-2 text-sm font-semibold text-[#5C7C5C] mb-3 tracking-wide uppercase">
+                  <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2h2.945M15 11a3 3 0 11-6 0m6 0a3 3 0 10-6 0m6 0h.01M21 11a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Country
@@ -338,15 +338,15 @@ function ProfilePageContent() {
                   type="text"
                   value={formData.country || ""}
                   onChange={handleChange}
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-900 bg-gray-50/50 hover:bg-white hover:border-gray-300"
+                  className="w-full px-5 py-4 border-2 border-[#5C7C5C]/20 rounded-xl focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] transition-all duration-200 text-[#5C7C5C] bg-white/80 hover:bg-white hover:border-[#5C7C5C]/40"
                   placeholder="United States"
                 />
               </div>
             </div>
 
             <div className="group">
-              <label htmlFor="bio" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label htmlFor="bio" className="flex items-center gap-2 text-sm font-semibold text-[#5C7C5C] mb-3 tracking-wide uppercase">
+                <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
                 Bio
@@ -357,7 +357,7 @@ function ProfilePageContent() {
                 value={formData.bio || ""}
                 onChange={handleChange}
                 rows={5}
-                className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-900 placeholder-gray-400 resize-y bg-gray-50/50 hover:bg-white hover:border-gray-300"
+                className="input-enhanced resize-y"
                 placeholder="Tell us about yourself..."
               />
             </div>
@@ -365,12 +365,12 @@ function ProfilePageContent() {
             <button
               type="submit"
               disabled={loading || (isSetup && !formData.nickname?.trim())}
-              className="group relative w-full bg-[#5C7C5C] text-white py-4 px-8 rounded-xl hover:bg-[#4A654A] focus:outline-none focus:ring-4 focus:ring-[#5C7C5C]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-bold text-base shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
+              className="btn-primary w-full py-4 px-8 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
                 {loading ? (
                   <>
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -385,7 +385,6 @@ function ProfilePageContent() {
                   </>
                 )}
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             </button>
           </form>
         </div>

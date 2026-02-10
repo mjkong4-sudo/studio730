@@ -20,13 +20,24 @@ model User {
   city          String?
   country       String?
   bio           String?
+  role          String    @default("user") // "user", "admin", "moderator"
+  blocked       Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
   records Record[]
   comments Comment[]
+  reactions Reaction[]
+  notifications Notification[]
+  reports Report[]
   
   verificationTokens VerificationToken[]
+
+  @@index([email])
+  @@index([nickname])
+  @@index([createdAt])
+  @@index([role])
+  @@index([blocked])
 }
 
 model VerificationToken {
@@ -45,12 +56,26 @@ model Record {
   city      String?  // Made optional
   content   String
   gathering String?  // e.g., "Studio 7:30 (Cupertino)" or "Studio 8:00 (Palo Alto)"
+  imageUrl  String?  // URL or base64 data URL for uploaded images
   userId    String
+  deleted   Boolean  @default(false)
+  deletedAt DateTime?
+  deletedBy String?  // Admin/mod who deleted
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   comments Comment[]
+  reactions Reaction[]
+  reports Report[]
+
+  @@index([userId])
+  @@index([date])
+  @@index([gathering])
+  @@index([createdAt])
+  @@index([userId, date])
+  @@index([gathering, date])
+  @@index([deleted])
 }
 
 model Comment {
@@ -58,9 +83,76 @@ model Comment {
   content   String
   userId    String
   recordId  String
+  deleted   Boolean  @default(false)
+  deletedAt DateTime?
+  deletedBy String?  // Admin/mod who deleted
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  reports Report[]
+
+  @@index([userId])
+  @@index([recordId])
+  @@index([createdAt])
+  @@index([recordId, createdAt])
+  @@index([deleted])
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  type      String   // "like", "heart", "thumbs-up"
+  recordId  String
+  userId    String
+  createdAt DateTime @default(now())
+  
+  record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([recordId, userId, type])
+  @@index([recordId])
+  @@index([userId])
+  @@index([recordId, type])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // "comment", "reaction", "mention"
+  message   String
+  link      String?  // URL to relevant content
+  read      Boolean  @default(false)
+  userId    String
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@index([read])
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  type        String   // "record", "comment", "user"
+  reason      String   // "spam", "inappropriate", "harassment", "other"
+  description String?
+  status      String   @default("pending") // "pending", "reviewed", "resolved", "dismissed"
+  reportedById String
+  recordId    String?
+  commentId   String?
+  reportedUserId String? // For user reports
+  reviewedBy  String?   // Admin/mod who reviewed
+  reviewedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  reportedBy User     @relation(fields: [reportedById], references: [id], onDelete: Cascade)
+  record     Record?  @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  comment    Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+  @@index([status, createdAt])
 }

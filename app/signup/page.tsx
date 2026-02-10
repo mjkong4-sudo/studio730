@@ -37,15 +37,15 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC] px-4 py-12">
-      <div className="max-w-md w-full">
-        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-[#5C7C5C]/10 p-8 sm:p-10">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#5C7C5C] tracking-tight mb-2">Studio 730</h1>
-            <p className="text-[#6B8E6A]">Create your account</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC] px-4 py-12 relative">
+      <div className="max-w-md w-full relative z-10">
+        <div className="glass-enhanced rounded-3xl shadow-brand-xl border-2 border-[#5C7C5C]/15 p-10 sm:p-12">
+          <div className="text-center mb-10">
+            <h1 className="text-4xl md:text-5xl font-bold text-gradient-brand tracking-tighter mb-4 leading-tight">Studio 730</h1>
+            <p className="text-[#6B8E6A] text-lg md:text-xl font-medium leading-relaxed">Create your account</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-7">
             {error && (
               <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded-r-lg flex items-start">
                 <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -56,7 +56,7 @@ export default function SignupPage() {
             )}
             
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-[#5C7C5C] mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-[#5C7C5C] mb-2 tracking-wide uppercase">
                 Email address <span className="text-red-500">*</span>
               </label>
               <input
@@ -65,7 +65,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-[#5C7C5C]/30 rounded-lg focus:ring-2 focus:ring-[#5C7C5C] focus:border-[#5C7C5C] transition-colors text-[#5C7C5C] placeholder-[#6B8E6A]/50"
+                className="input-enhanced py-3"
                 placeholder="your@email.com"
               />
               <p className="mt-2 text-sm text-[#6B8E6A]">
@@ -76,11 +76,11 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#5C7C5C] text-white py-3 px-4 rounded-lg hover:bg-[#4A654A] focus:outline-none focus:ring-2 focus:ring-[#5C7C5C] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold shadow-sm hover:shadow-md"
+              className="btn-primary w-full py-3 px-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {loading ? (
                 <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="spinner -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
