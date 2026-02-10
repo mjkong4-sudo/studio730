@@ -62,9 +62,16 @@ export function rateLimit(identifier: string, options: RateLimitOptions): { allo
 
 /**
  * Get client identifier from request
+ * For authenticated requests, prefer user ID over IP for better rate limiting
  */
-export function getClientIdentifier(request: Request): string {
-  // Try to get IP from headers (works with most proxies)
+export function getClientIdentifier(request: Request, userId?: string): string {
+  // If user is authenticated, use their user ID for rate limiting
+  // This prevents issues with shared IPs (e.g., office networks)
+  if (userId) {
+    return `user:${userId}`
+  }
+  
+  // Fallback to IP for unauthenticated requests
   const forwarded = request.headers.get('x-forwarded-for')
   const realIp = request.headers.get('x-real-ip')
   const ip = forwarded?.split(',')[0] || realIp || 'unknown'
@@ -77,9 +84,9 @@ import { NextResponse } from "next/server"
 /**
  * Rate limit middleware helper
  */
-export function createRateLimitMiddleware(options: RateLimitOptions) {
+export function createRateLimitMiddleware(options: RateLimitOptions, userId?: string) {
   return async (request: Request): Promise<NextResponse | null> => {
-    const identifier = getClientIdentifier(request)
+    const identifier = getClientIdentifier(request, userId)
     const result = rateLimit(identifier, options)
 
     if (!result.allowed) {

@@ -58,17 +58,18 @@ export async function PUT(request: Request) {
   const corsResponse = handleCorsPreflight(request)
   if (corsResponse) return corsResponse
 
-  // Apply rate limiting (stricter for updates: 5 per minute)
-  const updateRateLimit = createRateLimitMiddleware({ limit: 5, window: 60 * 1000 })
-  const rateLimitResponse = await updateRateLimit(request)
-  if (rateLimitResponse) return addSecurityHeaders(rateLimitResponse)
-
   try {
     const session = await getServerSessionHelper()
     
     if (!session?.user?.id) {
       throw new ApiError(401, "Unauthorized", ErrorCodes.UNAUTHORIZED)
     }
+
+    // Apply rate limiting (10 updates per minute - more lenient for profile setup)
+    // Use user ID for better rate limiting (prevents issues with shared IPs)
+    const updateRateLimit = createRateLimitMiddleware({ limit: 10, window: 60 * 1000 }, session.user.id)
+    const rateLimitResponse = await updateRateLimit(request)
+    if (rateLimitResponse) return addSecurityHeaders(rateLimitResponse)
 
     const body = await request.json()
     const { nickname, firstName, lastName, city, country, bio } = body

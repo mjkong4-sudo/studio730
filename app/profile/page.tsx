@@ -78,6 +78,12 @@ function ProfilePageContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Prevent double submission
+    if (loading) {
+      return
+    }
+    
     setError("")
     setSuccess("")
     setLoading(true)
@@ -91,7 +97,15 @@ function ProfilePageContent() {
 
       if (!response.ok) {
         const data = await response.json()
-        setError(data.error || "Failed to update profile")
+        
+        // Handle rate limit errors with better messaging
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After')
+          const waitTime = retryAfter ? parseInt(retryAfter) : 60
+          setError(`Too many requests. Please wait ${waitTime} seconds before trying again.`)
+        } else {
+          setError(data.error || data.message || "Failed to update profile")
+        }
         return
       }
 
