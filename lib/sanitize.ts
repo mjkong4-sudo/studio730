@@ -1,10 +1,11 @@
-import DOMPurify from 'isomorphic-dompurify'
-
 /**
  * Sanitizes HTML content to prevent XSS attacks
  * Allows only safe formatting tags
+ * Uses dynamic import to avoid loading jsdom in production unless needed
  */
-export function sanitizeHtml(html: string): string {
+export async function sanitizeHtml(html: string): Promise<string> {
+  // Dynamic import to avoid loading jsdom unless this function is actually called
+  const DOMPurify = (await import('isomorphic-dompurify')).default
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li'],
     ALLOWED_ATTR: ['href', 'target', 'rel'],
