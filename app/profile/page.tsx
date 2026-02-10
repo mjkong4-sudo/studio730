@@ -460,7 +460,7 @@ function ProfilePageContent() {
                               Enter your email address to confirm deletion
                             </label>
                             <p className="text-xs text-red-700 mb-2">
-                              Your account was created before password authentication. Please enter your email to confirm deletion.
+                              Your account was created before password authentication was added. Please enter your email address to confirm deletion.
                             </p>
                             <input
                               id="deleteEmail"
@@ -470,6 +470,9 @@ function ProfilePageContent() {
                               placeholder={session?.user?.email || "your@email.com"}
                               className="w-full px-4 py-3 border-2 border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-red-900 bg-white"
                             />
+                            <p className="text-xs text-red-600 mt-2">
+                              Your email: <span className="font-semibold">{session?.user?.email}</span>
+                            </p>
                           </div>
                         )}
                         <div className="flex gap-3">
