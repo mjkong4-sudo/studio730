@@ -72,6 +72,21 @@ export default function HomePage() {
   const [hasMore, setHasMore] = useState(true)
   const [totalCount, setTotalCount] = useState(0)
   const [reactingRecords, setReactingRecords] = useState<Set<string>>(new Set())
+  const [groups, setGroups] = useState<Array<{
+    id: string
+    name: string
+    location: string
+    day: string
+    time: string
+    description: string
+    stats: {
+      recordCount: number
+      memberCount: number
+      lastActivity: string | null
+      lastActivityBy: string | null
+    }
+  }>>([])
+  const [loadingGroups, setLoadingGroups] = useState(true)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -87,6 +102,7 @@ export default function HomePage() {
       }
       setPage(1)
       fetchRecords(1, false)
+      fetchGroups()
     }
   }, [status, session, router])
 
@@ -167,6 +183,21 @@ export default function HomePage() {
     } finally {
       setLoading(false)
       console.log("🏁 fetchRecords completed, loading set to false")
+    }
+  }
+
+  const fetchGroups = async () => {
+    try {
+      setLoadingGroups(true)
+      const response = await fetch("/api/groups")
+      if (response.ok) {
+        const data = await response.json()
+        setGroups(data.groups || [])
+      }
+    } catch (error) {
+      console.error("Error fetching groups:", error)
+    } finally {
+      setLoadingGroups(false)
     }
   }
 
@@ -377,9 +408,9 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8 mb-8">
             <div>
               <h1 className="text-5xl md:text-6xl font-bold text-gradient-brand tracking-tighter mb-4 leading-tight">
-                Studio 730 Records
+                Studio 730
               </h1>
-              <p className="text-[#6B8E6A] text-xl md:text-2xl font-medium leading-relaxed">Track your Thursday 7:30 gatherings</p>
+              <p className="text-[#6B8E6A] text-xl md:text-2xl font-medium leading-relaxed">Connect with your community groups</p>
             </div>
             <Link
               href="/create-record"
@@ -393,6 +424,113 @@ export default function HomePage() {
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
             </Link>
+          </div>
+
+          {/* Groups Overview Section */}
+          <div className="mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gradient-subtle mb-6 tracking-tight">Our Groups</h2>
+            {loadingGroups ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[1, 2].map((i) => (
+                  <div key={i} className="glass-enhanced rounded-2xl shadow-brand-lg border-2 border-[#5C7C5C]/15 p-8 animate-pulse">
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
+                    <div className="space-y-3">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : groups.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {groups.map((group, index) => (
+                  <div
+                    key={group.id}
+                    onClick={() => {
+                      setSelectedGathering(group.name)
+                      setSearchQuery("")
+                    }}
+                    className="glass-enhanced rounded-2xl shadow-brand-lg border-2 border-[#5C7C5C]/15 p-8 hover:border-[#5C7C5C]/40 hover:shadow-brand-xl transition-all duration-300 cursor-pointer group card-lift animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-2xl md:text-3xl font-bold text-gradient-subtle mb-2 tracking-tight group-hover:text-[#5C7C5C] transition-colors">
+                          {group.name}
+                        </h3>
+                        <div className="flex items-center gap-3 text-[#6B8E6A] mb-4">
+                          <div className="flex items-center gap-1.5">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span className="text-sm font-medium">{group.location}</span>
+                          </div>
+                          <span className="text-[#5C7C5C]">•</span>
+                          <div className="flex items-center gap-1.5">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-sm font-medium">{group.day} @ {group.time}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#5C7C5C] to-[#6B8E6A] flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform">
+                          {group.name.includes("7:30") ? "7:30" : "8:00"}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <p className="text-[#6B8E6A] text-sm mb-6 leading-relaxed">{group.description}</p>
+                    
+                    <div className="grid grid-cols-2 gap-4 pt-6 border-t border-[#5C7C5C]/20">
+                      <div>
+                        <div className="text-2xl font-bold text-gradient-subtle mb-1">{group.stats.recordCount}</div>
+                        <div className="text-xs text-[#6B8E6A] uppercase tracking-wide">Records</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-gradient-subtle mb-1">{group.stats.memberCount}</div>
+                        <div className="text-xs text-[#6B8E6A] uppercase tracking-wide">Members</div>
+                      </div>
+                    </div>
+                    
+                    {group.stats.lastActivity && (
+                      <div className="mt-4 pt-4 border-t border-[#5C7C5C]/10">
+                        <div className="text-xs text-[#6B8E6A]">
+                          Last activity: <span className="font-semibold text-[#5C7C5C]">
+                            {new Date(group.stats.lastActivity).toLocaleDateString()}
+                          </span>
+                          {group.stats.lastActivityBy && (
+                            <span> by {group.stats.lastActivityBy}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="mt-6 pt-4 border-t border-[#5C7C5C]/10">
+                      <div className="flex items-center gap-2 text-[#5C7C5C] text-sm font-semibold group-hover:text-[#4A654A] transition-colors">
+                        <span>View records</span>
+                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="glass-enhanced rounded-2xl shadow-brand-lg border-2 border-[#5C7C5C]/15 p-8 text-center">
+                <p className="text-[#6B8E6A]">No groups available at the moment.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Records Section Header */}
+          <div className="mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-gradient-subtle mb-2 tracking-tight">Recent Records</h2>
+            <p className="text-[#6B8E6A] text-lg">See what members are sharing</p>
           </div>
 
           {/* Filter and Search Bar */}
