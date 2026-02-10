@@ -101,7 +101,7 @@ export function validateRequest(
 /**
  * Handle CORS preflight requests
  */
-export function handleCorsPreflight(request: Request): Response | null {
+export function handleCorsPreflight(request: Request): NextResponse | null {
   if (request.method === "OPTIONS") {
     const response = new NextResponse(null, { status: 200 })
     return addSecurityHeaders(response)

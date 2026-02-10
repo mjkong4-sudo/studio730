@@ -72,25 +72,26 @@ export function getClientIdentifier(request: Request): string {
   return ip
 }
 
+import { NextResponse } from "next/server"
+
 /**
  * Rate limit middleware helper
  */
 export function createRateLimitMiddleware(options: RateLimitOptions) {
-  return async (request: Request): Promise<Response | null> => {
+  return async (request: Request): Promise<NextResponse | null> => {
     const identifier = getClientIdentifier(request)
     const result = rateLimit(identifier, options)
 
     if (!result.allowed) {
       const resetSeconds = Math.ceil((result.resetAt - Date.now()) / 1000)
-      return new Response(
-        JSON.stringify({ 
+      return NextResponse.json(
+        { 
           error: 'Too many requests',
           message: `Rate limit exceeded. Please try again in ${resetSeconds} seconds.`
-        }),
+        },
         {
           status: 429,
           headers: {
-            'Content-Type': 'application/json',
             'Retry-After': resetSeconds.toString(),
             'X-RateLimit-Limit': options.limit.toString(),
             'X-RateLimit-Remaining': result.remaining.toString(),

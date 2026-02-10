@@ -7,6 +7,8 @@ declare module "next-auth" {
       email: string
       nickname: string
       hasNickname: boolean
+      role?: string
+      blocked?: boolean
     }
   }
 
@@ -15,6 +17,8 @@ declare module "next-auth" {
     email: string
     nickname: string
     hasNickname: boolean
+    role?: string
+    blocked?: boolean
   }
 }
 
@@ -24,6 +28,8 @@ declare module "next-auth/jwt" {
     email: string
     nickname: string
     hasNickname: boolean
+    role?: string
+    blocked?: boolean
   }
 }
 

@@ -14,7 +14,7 @@ export async function requireAdmin() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { role: true, blocked: true }
+    select: { id: true, role: true, blocked: true }
   })
 
   if (!user) {
