@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   if (corsResponse) return corsResponse
 
   try {
-    const { admin } = await requireAdmin()
+    await requireAdmin()
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status") || "pending"
