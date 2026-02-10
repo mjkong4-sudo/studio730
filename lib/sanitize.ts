@@ -1,16 +1,15 @@
 /**
  * Sanitizes HTML content to prevent XSS attacks
  * Allows only safe formatting tags
- * Uses dynamic import to avoid loading jsdom in production unless needed
+ * 
+ * NOTE: Currently escapes all HTML (same as sanitizeText) to avoid jsdom dependency.
+ * If HTML sanitization with allowed tags is needed in the future, consider using
+ * a different library that doesn't require jsdom.
  */
-export async function sanitizeHtml(html: string): Promise<string> {
-  // Dynamic import to avoid loading jsdom unless this function is actually called
-  const DOMPurify = (await import('isomorphic-dompurify')).default
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
-    ALLOW_DATA_ATTR: false,
-  })
+export function sanitizeHtml(html: string): string {
+  // For now, escape all HTML entities (same as sanitizeText)
+  // This prevents XSS while avoiding jsdom dependency issues
+  return sanitizeText(html)
 }
 
 /**
