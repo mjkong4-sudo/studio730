@@ -80,10 +80,14 @@ function ProfilePageContent() {
   // Check if user has password when delete confirmation is shown
   useEffect(() => {
     if (showDeleteConfirm && session?.user?.email) {
-      // Check if account has password by making a test request
-      // For now, we'll assume accounts without passwords need email confirmation
-      // This will be determined by the API response
       setDeleteEmail(session.user.email)
+      // Reset hasPassword to default (will be determined by API response if wrong)
+      setHasPassword(true)
+    } else {
+      // Reset when closing confirmation
+      setHasPassword(true)
+      setDeletePassword("")
+      setDeleteEmail(session?.user?.email || "")
     }
   }, [showDeleteConfirm, session])
 
@@ -539,14 +543,16 @@ function ProfilePageContent() {
 
       if (!response.ok) {
         // Check if error indicates account has no password
-        if (data.error?.includes("no password") || data.error?.includes("Email confirmation")) {
+        if (data.error?.includes("no password") || data.error?.includes("Email confirmation") || data.error?.includes("email address")) {
           setHasPassword(false)
-          setError("") // Clear error, show email input instead
+          setError("") // Clear error, UI will show email input instead
+          setDeleting(false)
+          return
         } else {
           setError(data.error || "Failed to delete account")
+          setDeleting(false)
+          return
         }
-        setDeleting(false)
-        return
       }
 
       // Sign out and redirect to home
