@@ -25,7 +25,16 @@ export default function LoginPage() {
 
       if (result?.error) {
         console.error("Sign in error:", result.error)
-        setError(`Failed to sign in: ${result.error}`)
+        // Provide user-friendly error messages
+        let errorMessage = "Failed to sign in. Please try again."
+        if (result.error === "CredentialsSignin") {
+          errorMessage = "Invalid email or authentication failed. Please check your email and try again."
+        } else if (result.error.includes("blocked")) {
+          errorMessage = "Your account has been blocked. Please contact support."
+        } else if (result.error) {
+          errorMessage = result.error
+        }
+        setError(errorMessage)
       } else if (result?.ok) {
         // Check if user has nickname, redirect to profile if not
         // We'll check this on the home page after session loads

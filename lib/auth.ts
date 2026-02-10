@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
         try {
           if (!credentials?.email) {
             console.error("No email provided")
-            return null
+            throw new Error("Email is required")
           }
 
           const email = credentials.email.toLowerCase().trim()
@@ -24,7 +24,13 @@ export const authOptions: NextAuthOptions = {
 
           // Find or create user
           let user = await prisma.user.findUnique({
-            where: { email }
+            where: { email },
+            select: {
+              id: true,
+              email: true,
+              nickname: true,
+              blocked: true,
+            }
           })
 
           if (!user) {
@@ -34,11 +40,23 @@ export const authOptions: NextAuthOptions = {
               data: {
                 email,
                 emailVerified: new Date(), // Mark as verified since we're skipping verification
+              },
+              select: {
+                id: true,
+                email: true,
+                nickname: true,
+                blocked: true,
               }
             })
             console.log("User created:", user.id)
           } else {
             console.log("User found:", user.id)
+            
+            // Check if user is blocked
+            if (user.blocked) {
+              console.error("User is blocked:", email)
+              throw new Error("Your account has been blocked. Please contact support.")
+            }
           }
 
           const authUser: User = {
@@ -50,7 +68,11 @@ export const authOptions: NextAuthOptions = {
           return authUser
         } catch (error) {
           console.error("Error in authorize:", error)
-          return null
+          // Re-throw the error so NextAuth can provide a better error message
+          if (error instanceof Error) {
+            throw error
+          }
+          throw new Error("Authentication failed. Please try again.")
         }
       }
     })
