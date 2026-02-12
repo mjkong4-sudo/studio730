@@ -100,7 +100,6 @@ export default function CreateRecordPage() {
     setLoading(true)
 
     try {
-      console.log("Submitting form data:", formData)
       const response = await fetch("/api/records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -110,21 +109,11 @@ export default function CreateRecordPage() {
       if (!response.ok) {
         let errorMessage = "Failed to create record. Please make sure all fields are filled."
         try {
-          const data = await response.json()
-          console.error("API Error Response:", data)
-          console.error("Response status:", response.status)
-          console.error("Response headers:", Object.fromEntries(response.headers.entries()))
-          errorMessage = data?.error || errorMessage
-        } catch (parseError) {
-          // If response is not JSON, get text
-          try {
-            const text = await response.text()
-            console.error("API Error Text:", text)
-            errorMessage = text || errorMessage
-          } catch (textError) {
-            console.error("Could not read response:", textError)
-            errorMessage = `Server error (${response.status}). Please try again.`
-          }
+          const text = await response.text()
+          const data = text ? JSON.parse(text) : {}
+          errorMessage = (data?.error || data?.message || errorMessage) as string
+        } catch {
+          errorMessage = `Server error (${response.status}). Please try again.`
         }
         setError(errorMessage)
         return

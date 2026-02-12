@@ -3,29 +3,10 @@ import { prisma } from "@/lib/prisma"
 import { addSecurityHeaders, addCacheHeaders, handleCorsPreflight } from "@/lib/middleware"
 import { createErrorResponse } from "@/lib/api-error"
 import { createRateLimitMiddleware } from "@/lib/rate-limit"
+import { AVAILABLE_GROUPS } from "@/lib/groups"
 
 // Rate limiting: 60 requests per minute
 const getRateLimit = createRateLimitMiddleware({ limit: 60, window: 60 * 1000 })
-
-// Define available groups
-const AVAILABLE_GROUPS = [
-  {
-    id: "studio-730-cupertino",
-    name: "Studio 7:30 (Cupertino)",
-    location: "Cupertino",
-    day: "Thursday",
-    time: "7:30 PM",
-    description: "Join us every Thursday at 7:30 PM in Cupertino"
-  },
-  {
-    id: "studio-800-palo-alto",
-    name: "Studio 8:00 (Palo Alto)",
-    location: "Palo Alto",
-    day: "Sunday",
-    time: "8:00 AM",
-    description: "Join us every Sunday at 8:00 AM in Palo Alto"
-  }
-]
 
 export async function GET(request: Request) {
   // Handle CORS preflight

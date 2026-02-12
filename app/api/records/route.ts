@@ -24,14 +24,22 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get("limit") || "20", 10)
     const gathering = searchParams.get("gathering")
     const search = searchParams.get("search")
-    
+    const mine = searchParams.get("mine") === "true"
+
     // Validate pagination parameters
     const pageNum = Math.max(1, page)
     const limitNum = Math.min(Math.max(1, limit), 100) // Max 100 records per page
     const skip = (pageNum - 1) * limitNum
 
+    // Get session early for mine filter
+    const session = await getServerSessionHelper()
+    const currentUserId = session?.user?.id
+
     // Build where clause for filtering
     const where: any = { deleted: false }
+    if (mine && currentUserId) {
+      where.userId = currentUserId
+    }
     if (gathering && gathering !== "all") {
       where.gathering = gathering
     }
@@ -52,10 +60,6 @@ export async function GET(request: Request) {
     // Get total count for pagination
     const totalCount = await prisma.record.count({ where })
     const totalPages = Math.ceil(totalCount / limitNum)
-
-    // Get session to check user's reactions
-    const session = await getServerSessionHelper()
-    const currentUserId = session?.user?.id
 
     // Fetch paginated records
     const records = await prisma.record.findMany({
@@ -155,6 +159,15 @@ export async function POST(request: Request) {
     
     if (!session?.user?.id) {
       throw new ApiError(401, "Unauthorized", ErrorCodes.UNAUTHORIZED)
+    }
+
+    // Verify user still exists in DB (handles deleted users with stale sessions)
+    const userExists = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true }
+    })
+    if (!userExists) {
+      throw new ApiError(401, "Your account may have been removed. Please sign in again.", ErrorCodes.UNAUTHORIZED)
     }
 
     let body
