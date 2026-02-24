@@ -11,16 +11,15 @@ export default function CreateRecordPage() {
   const [formData, setFormData] = useState({
     date: "",
     content: "",
-    gathering: "",
+    groupId: "",
+    projectId: "",
     imageUrl: "",
   })
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
 
-  const gatherings = [
-    { value: "Studio 7:30 (Cupertino)", label: "Studio 7:30 (Cupertino) : Thursday @7:30" },
-    { value: "Studio 8:00 (Palo Alto)", label: "Studio 8:00 (Palo Alto) : Sunday @8:00" },
-  ]
+  const [groups, setGroups] = useState<Array<{ id: string; name: string; location: string | null; day: string | null; time: string | null }>>([])
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -30,10 +29,16 @@ export default function CreateRecordPage() {
       return
     }
 
-    // Set default date to today
-    if (status === "authenticated" && !formData.date) {
+    if (status === "authenticated") {
       const today = new Date().toISOString().split("T")[0]
-      setFormData({ ...formData, date: today })
+      setFormData(prev => ({ ...prev, date: prev.date || today }))
+      Promise.all([
+        fetch("/api/groups").then(res => res.ok ? res.json() : { groups: [] }),
+        fetch("/api/projects").then(res => res.ok ? res.json() : { projects: [] }),
+      ]).then(([groupsData, projectsData]) => {
+        setGroups(groupsData.groups || [])
+        setProjects(projectsData.projects || [])
+      }).catch(() => {})
     }
   }, [status, router])
 
@@ -103,7 +108,13 @@ export default function CreateRecordPage() {
       const response = await fetch("/api/records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          date: formData.date,
+          content: formData.content,
+          groupId: formData.groupId || undefined,
+          projectId: formData.projectId || undefined,
+          imageUrl: formData.imageUrl || undefined,
+        }),
       })
 
       if (!response.ok) {
@@ -197,27 +208,81 @@ export default function CreateRecordPage() {
             </div>
 
             <div className="group">
-              <label htmlFor="gathering" className="flex items-center gap-2 text-sm font-semibold text-[#5C7C5C] mb-3 tracking-wide uppercase">
+              <label htmlFor="groupId" className="flex items-center gap-2 text-sm font-semibold text-[#5C7C5C] mb-3 tracking-wide uppercase">
                 <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                Gathering <span className="text-red-500">*</span>
+                Group <span className="text-red-500">*</span>
               </label>
               <select
-                id="gathering"
-                name="gathering"
-                value={formData.gathering}
+                id="groupId"
+                name="groupId"
+                value={formData.groupId}
                 onChange={handleChange}
                 required
                 className="input-enhanced hover:bg-[#F5F5EC]"
               >
-                <option value="">Select a gathering</option>
-                {gatherings.map((gathering) => (
-                  <option key={gathering.value} value={gathering.value}>
-                    {gathering.label}
+                <option value="">Select a group</option>
+                {groups.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                    {g.day && g.time ? ` : ${g.day} @ ${g.time}` : ""}
                   </option>
                 ))}
               </select>
+              {groups.length === 0 && !loading && (
+                <p className="mt-2 text-sm text-[#6B8E6A]">
+                  No groups yet. <a href="/create-group" className="text-[#5C7C5C] font-semibold hover:underline">Create one</a>
+                </p>
+              )}
+            </div>
+
+            <div className="group">
+              <label htmlFor="projectId" className="flex items-center gap-2 text-sm font-semibold text-[#5C7C5C] mb-3 tracking-wide uppercase">
+                <svg className="w-4 h-4 text-[#5C7C5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+                Project (Optional)
+              </label>
+              <select
+                id="projectId"
+                name="projectId"
+                value={formData.projectId}
+                onChange={handleChange}
+                className="input-enhanced hover:bg-[#F5F5EC]"
+              >
+                <option value="">No project</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-sm text-[#6B8E6A]">
+                Tag this record with a personal project (e.g. Writing, Art).{" "}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const name = prompt("New project name:")
+                    if (!name?.trim()) return
+                    try {
+                      const res = await fetch("/api/projects", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name: name.trim() }),
+                      })
+                      if (res.ok) {
+                        const p = await res.json()
+                        setProjects(prev => [...prev, p])
+                        setFormData(prev => ({ ...prev, projectId: p.id }))
+                      }
+                    } catch { /* ignore */ }
+                  }}
+                  className="text-[#5C7C5C] font-semibold hover:underline"
+                >
+                  + Add new project
+                </button>
+              </p>
             </div>
 
             <div className="group">

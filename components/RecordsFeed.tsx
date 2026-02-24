@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import type { Session } from "next-auth"
 import ReportButton from "./ReportButton"
-import { getGroupByName } from "@/lib/groups"
 
 export interface Comment {
   id: string
@@ -23,6 +22,8 @@ export interface StudioRecord {
   city: string | null
   content: string
   gathering: string | null
+  group?: { id: string; name: string } | null
+  project?: { id: string; name: string } | null
   imageUrl: string | null
   createdAt: string
   user: {
@@ -43,9 +44,13 @@ export interface StudioRecord {
 
 interface RecordsFeedProps {
   session: Session
-  gatheringFilter: string
+  gatheringFilter?: string
+  groupIdFilter?: string
+  projectIdFilter?: string
   showGatheringFilter?: boolean
+  showProjectFilter?: boolean
   availableGatherings?: string[]
+  availableProjects?: Array<{ id: string; name: string }>
   title?: string
   subtitle?: string
   mine?: boolean
@@ -54,9 +59,13 @@ interface RecordsFeedProps {
 
 export default function RecordsFeed({
   session,
-  gatheringFilter,
+  gatheringFilter = "all",
+  groupIdFilter,
+  projectIdFilter,
   showGatheringFilter = false,
+  showProjectFilter = false,
   availableGatherings = [],
+  availableProjects = [],
   title = "Recent Records",
   subtitle = "See what members are sharing",
   mine = false,
@@ -76,6 +85,9 @@ export default function RecordsFeed({
   const [reactingRecords, setReactingRecords] = useState<Set<string>>(new Set())
 
   const effectiveGathering = showGatheringFilter ? selectedGathering : gatheringFilter
+  const effectiveGroupId = groupIdFilter
+  const effectiveProjectId = projectIdFilter
+  const [selectedProject, setSelectedProject] = useState(projectIdFilter || "all")
 
   const fetchRecords = async (pageNum: number = 1, append: boolean = false) => {
     try {
@@ -83,7 +95,11 @@ export default function RecordsFeed({
       const params = new URLSearchParams({
         page: pageNum.toString(),
         limit: "20",
-        ...(effectiveGathering !== "all" && { gathering: effectiveGathering }),
+        ...(effectiveGroupId && { groupId: effectiveGroupId }),
+        ...(!effectiveGroupId && effectiveGathering !== "all" && { gathering: effectiveGathering }),
+        ...((effectiveProjectId || (showProjectFilter && selectedProject !== "all" ? selectedProject : null)) && {
+          projectId: effectiveProjectId || selectedProject
+        }),
         ...(searchQuery.trim() && { search: searchQuery.trim() }),
         ...(mine && { mine: "true" })
       })
@@ -122,7 +138,7 @@ export default function RecordsFeed({
     setPage(1)
     setRecords([])
     fetchRecords(1, false)
-  }, [effectiveGathering, searchQuery, mine])
+  }, [effectiveGathering, effectiveGroupId, effectiveProjectId, showProjectFilter ? selectedProject : "all", searchQuery, mine])
 
   const handleLoadMore = () => {
     const nextPage = page + 1
@@ -246,6 +262,7 @@ export default function RecordsFeed({
 
   const clearFilters = () => {
     setSelectedGathering("all")
+    setSelectedProject("all")
     setSearchQuery("")
   }
 
@@ -313,6 +330,22 @@ export default function RecordsFeed({
             </div>
           </div>
 
+          {showProjectFilter && availableProjects.length > 0 && (
+            <div className="md:w-64">
+              <label htmlFor="project-filter" className="sr-only">Filter by project</label>
+              <select
+                id="project-filter"
+                value={selectedProject}
+                onChange={e => setSelectedProject(e.target.value)}
+                className="w-full py-3 pr-10 pl-4 border-2 border-[#5C7C5C]/20 rounded-xl focus:ring-2 focus:ring-[#5C7C5C]/30 focus:border-[#5C7C5C] text-[#5C7C5C] bg-white/80 text-sm"
+              >
+                <option value="all">All Projects</option>
+                {availableProjects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           {showGatheringFilter && (
             <div className="md:w-64">
               <label htmlFor="gathering-filter" className="sr-only">Filter by gathering</label>
@@ -344,13 +377,18 @@ export default function RecordsFeed({
           )}
         </div>
 
-        {(effectiveGathering !== "all" || searchQuery.trim() !== "" || totalCount > 0) && (
+        {(effectiveGathering !== "all" || selectedProject !== "all" || searchQuery.trim() !== "" || totalCount > 0) && (
           <div className="mt-4 pt-4 border-t border-[#5C7C5C]/20">
             <p className="text-sm text-[#6B8E6A]">
               Showing <span className="font-semibold text-[#5C7C5C]">{records.length}</span> of <span className="font-semibold text-[#5C7C5C]">{totalCount}</span> records
               {effectiveGathering !== "all" && (
                 <span className="ml-2">
-                  • Filtered by: <span className="font-semibold text-[#5C7C5C]">{effectiveGathering}</span>
+                  • Group: <span className="font-semibold text-[#5C7C5C]">{effectiveGathering}</span>
+                </span>
+              )}
+              {selectedProject !== "all" && (
+                <span className="ml-2">
+                  • Project: <span className="font-semibold text-[#5C7C5C]">{availableProjects.find(p => p.id === selectedProject)?.name || selectedProject}</span>
                 </span>
               )}
               {searchQuery.trim() !== "" && (
@@ -359,7 +397,7 @@ export default function RecordsFeed({
                 </span>
               )}
             </p>
-            {(effectiveGathering !== "all" || searchQuery.trim() !== "") && (
+            {(effectiveGathering !== "all" || selectedProject !== "all" || searchQuery.trim() !== "") && (
               <button onClick={clearFilters} className="mt-2 text-sm text-[#5C7C5C] hover:text-[#4A654A] font-semibold transition-colors underline">
                 Clear all filters
               </button>
@@ -404,7 +442,6 @@ export default function RecordsFeed({
               {groupedRecords[monthYear].map((record: StudioRecord, recordIndex: number) => {
                 const isNew = isRecentRecord(record.createdAt)
                 const isFirstInMonth = recordIndex === 0
-                const recordGroup = record.gathering ? getGroupByName(record.gathering) : null
                 return (
                   <article
                     key={record.id}
@@ -428,15 +465,15 @@ export default function RecordsFeed({
                       </div>
                     )}
 
-                    {emphasizeGroup && record.gathering && (
+                    {emphasizeGroup && (record.gathering || record.group) && (
                       <div className="mb-6 flex items-center gap-2">
                         <span className="text-sm font-semibold text-[#6B8E6A] uppercase tracking-wide">Group:</span>
-                        {recordGroup ? (
+                        {record.group ? (
                           <Link
-                            href={`/groups/${recordGroup.id}`}
+                            href={`/groups/${record.group.id}`}
                             className="badge-primary text-base px-4 py-2 hover:opacity-90 transition-opacity"
                           >
-                            {record.gathering}
+                            {record.group.name}
                           </Link>
                         ) : (
                           <span className="badge-primary text-base px-4 py-2">{record.gathering}</span>
@@ -468,8 +505,10 @@ export default function RecordsFeed({
                             </svg>
                             <span className="font-semibold">{formatDate(record.date)}</span>
                           </div>
-                          {record.gathering && (
-                            <span className="badge-primary transition-all duration-200 hover:scale-105">{record.gathering}</span>
+                          {(record.group?.name || record.gathering) && (
+                            <span className="badge-primary transition-all duration-200 hover:scale-105">
+                              {record.group?.name || record.gathering}
+                            </span>
                           )}
                           {record.city && (
                             <div className="badge-secondary transition-all duration-200 hover:scale-105">

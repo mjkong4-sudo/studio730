@@ -94,9 +94,30 @@ studio730-app/
 └── types/                # TypeScript type definitions
 ```
 
+## New Features Setup (Groups, Projects, Donations)
+
+After pulling the latest code, run these steps to enable the new features:
+
+1. **Run database migration** (requires `DATABASE_URL` in `.env`):
+```bash
+npx prisma migrate deploy
+```
+
+2. **Seed initial groups** (Cupertino and Palo Alto):
+```bash
+npm run db:seed
+```
+
+3. **Optional - Stripe for donations**: Add to `.env`:
+```
+STRIPE_SECRET_KEY=sk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_...
+```
+
 ## Database
 
-The application uses SQLite for development (can be easily switched to PostgreSQL for production).
+The application uses PostgreSQL. Set `DATABASE_URL` in your `.env` file.
 
 To view the database:
 ```bash

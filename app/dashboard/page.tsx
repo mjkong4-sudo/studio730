@@ -6,14 +6,16 @@ import { useRouter } from "next/navigation"
 import Navbar from "@/components/Navbar"
 import Link from "next/link"
 import RecordsFeed from "@/components/RecordsFeed"
+import CalendarView from "@/components/CalendarView"
+import TimelineView from "@/components/TimelineView"
 
 interface Group {
   id: string
   name: string
-  location: string
-  day: string
-  time: string
-  description: string
+  location?: string | null
+  day?: string | null
+  time?: string | null
+  description?: string | null
   stats: {
     recordCount: number
     memberCount: number
@@ -26,7 +28,11 @@ export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [groups, setGroups] = useState<Group[]>([])
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([])
   const [loadingGroups, setLoadingGroups] = useState(true)
+  const [viewMode, setViewMode] = useState<"list" | "calendar" | "timeline">("list")
+  const [selectedGathering, setSelectedGathering] = useState("all")
+  const [selectedProject, setSelectedProject] = useState("all")
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -45,10 +51,17 @@ export default function DashboardPage() {
   const fetchGroups = async () => {
     try {
       setLoadingGroups(true)
-      const response = await fetch("/api/groups")
-      if (response.ok) {
-        const data = await response.json()
+      const [groupsRes, projectsRes] = await Promise.all([
+        fetch("/api/groups"),
+        fetch("/api/projects"),
+      ])
+      if (groupsRes.ok) {
+        const data = await groupsRes.json()
         setGroups(data.groups || [])
+      }
+      if (projectsRes.ok) {
+        const data = await projectsRes.json()
+        setProjects(data.projects || [])
       }
     } catch (error) {
       console.error("Error fetching groups:", error)
@@ -75,6 +88,12 @@ export default function DashboardPage() {
 
   const availableGatherings = groups.map(g => g.name)
 
+  const viewTabs = [
+    { id: "list" as const, label: "List", icon: "M4 6h16M4 10h16M4 14h16M4 18h16" },
+    { id: "calendar" as const, label: "Calendar", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
+    { id: "timeline" as const, label: "Timeline", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC] relative">
       <div className="decorative-circle w-96 h-96 top-0 right-0 opacity-30" />
@@ -98,14 +117,85 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <RecordsFeed
-          session={session}
-          gatheringFilter="all"
-          showGatheringFilter={true}
-          availableGatherings={availableGatherings}
-          title="Recent Records"
-          subtitle="See what members are sharing across all groups"
-        />
+        <div className="glass-enhanced rounded-2xl border-2 border-[#5C7C5C]/15 p-6 mb-8">
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex rounded-xl overflow-hidden border-2 border-[#5C7C5C]/20">
+              {viewTabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setViewMode(tab.id)}
+                  className={`px-6 py-3 text-sm font-semibold flex items-center gap-2 transition-colors ${
+                    viewMode === tab.id
+                      ? "bg-[#5C7C5C] text-white"
+                      : "bg-white/80 text-[#6B8E6A] hover:bg-[#5C7C5C]/10"
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
+                  </svg>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            {(viewMode === "calendar" || viewMode === "timeline") && (
+              <div className="flex gap-4 flex-wrap">
+                <select
+                  value={selectedGathering}
+                  onChange={e => setSelectedGathering(e.target.value)}
+                  className="py-2 px-4 rounded-xl border-2 border-[#5C7C5C]/20 text-sm text-[#5C7C5C]"
+                >
+                  <option value="all">All Groups</option>
+                  {groups.map(g => (
+                    <option key={g.id} value={g.name}>{g.name}</option>
+                  ))}
+                </select>
+                <select
+                  value={selectedProject}
+                  onChange={e => setSelectedProject(e.target.value)}
+                  className="py-2 px-4 rounded-xl border-2 border-[#5C7C5C]/20 text-sm text-[#5C7C5C]"
+                >
+                  <option value="all">All Projects</option>
+                  {projects.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {viewMode === "list" && (
+          <RecordsFeed
+            session={session}
+            gatheringFilter="all"
+            showGatheringFilter={true}
+            showProjectFilter={true}
+            availableGatherings={availableGatherings}
+            availableProjects={projects}
+            title="Recent Records"
+            subtitle="See what members are sharing across all groups"
+          />
+        )}
+        {viewMode === "calendar" && (
+          <div>
+            <h2 className="text-2xl font-bold text-gradient-subtle mb-6">Calendar View</h2>
+            <CalendarView
+              session={session}
+              gatheringFilter={selectedGathering !== "all" ? selectedGathering : undefined}
+              projectIdFilter={selectedProject !== "all" ? selectedProject : undefined}
+            />
+          </div>
+        )}
+        {viewMode === "timeline" && (
+          <div>
+            <h2 className="text-2xl font-bold text-gradient-subtle mb-6">Timeline View</h2>
+            <TimelineView
+              session={session}
+              gatheringFilter={selectedGathering !== "all" ? selectedGathering : undefined}
+              projectIdFilter={selectedProject !== "all" ? selectedProject : undefined}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

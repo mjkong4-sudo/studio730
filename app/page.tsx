@@ -9,10 +9,10 @@ import Link from "next/link"
 interface Group {
   id: string
   name: string
-  location: string
-  day: string
-  time: string
-  description: string
+  location?: string | null
+  day?: string | null
+  time?: string | null
+  description?: string | null
   stats: {
     recordCount: number
     memberCount: number
@@ -92,6 +92,17 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
+                href="/create-group"
+                className="group inline-flex items-center justify-center bg-white/80 border-2 border-[#5C7C5C]/30 text-[#5C7C5C] px-8 py-4 rounded-xl hover:border-[#5C7C5C] hover:bg-[#5C7C5C]/10 focus:outline-none focus:ring-4 focus:ring-[#5C7C5C]/30 transition-all duration-300 font-bold text-base shadow-md hover:shadow-lg"
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Group
+                </span>
+              </Link>
+              <Link
                 href="/dashboard"
                 className="group inline-flex items-center justify-center bg-white/80 border-2 border-[#5C7C5C]/30 text-[#5C7C5C] px-8 py-4 rounded-xl hover:border-[#5C7C5C] hover:bg-[#5C7C5C]/10 focus:outline-none focus:ring-4 focus:ring-[#5C7C5C]/30 transition-all duration-300 font-bold text-base shadow-md hover:shadow-lg"
               >
@@ -152,22 +163,28 @@ export default function HomePage() {
                         <h3 className="text-2xl md:text-3xl font-bold text-gradient-subtle mb-2 tracking-tight group-hover:text-[#5C7C5C] transition-colors">
                           {group.name}
                         </h3>
-                        <div className="flex items-center gap-3 text-[#6B8E6A] mb-4">
-                          <div className="flex items-center gap-1.5">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span className="text-sm font-medium">{group.location}</span>
+                        {(group.location || group.day || group.time) && (
+                          <div className="flex items-center gap-3 text-[#6B8E6A] mb-4">
+                            {group.location && (
+                              <div className="flex items-center gap-1.5">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span className="text-sm font-medium">{group.location}</span>
+                              </div>
+                            )}
+                            {group.location && (group.day || group.time) && <span className="text-[#5C7C5C]">•</span>}
+                            {(group.day || group.time) && (
+                              <div className="flex items-center gap-1.5">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span className="text-sm font-medium">{group.day && group.time ? `${group.day} @ ${group.time}` : group.day || group.time}</span>
+                              </div>
+                            )}
                           </div>
-                          <span className="text-[#5C7C5C]">•</span>
-                          <div className="flex items-center gap-1.5">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span className="text-sm font-medium">{group.day} @ {group.time}</span>
-                          </div>
-                        </div>
+                        )}
                       </div>
                       <div className="ml-4">
                         <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#5C7C5C] to-[#6B8E6A] flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform">
@@ -176,7 +193,7 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    <p className="text-[#6B8E6A] text-sm mb-6 leading-relaxed">{group.description}</p>
+                    {group.description && <p className="text-[#6B8E6A] text-sm mb-6 leading-relaxed">{group.description}</p>}
 
                     <div className="grid grid-cols-2 gap-4 pt-6 border-t border-[#5C7C5C]/20">
                       <div>

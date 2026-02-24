@@ -9,7 +9,9 @@ import Notifications from "./Notifications"
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/my-records", label: "My Records" }
+  { href: "/projects", label: "Projects" },
+  { href: "/my-records", label: "My Records" },
+  { href: "/donate", label: "Donate" }
 ]
 
 export default function Navbar() {

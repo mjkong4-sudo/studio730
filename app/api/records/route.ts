@@ -23,6 +23,10 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "1", 10)
     const limit = parseInt(searchParams.get("limit") || "20", 10)
     const gathering = searchParams.get("gathering")
+    const groupId = searchParams.get("groupId")
+    const projectId = searchParams.get("projectId")
+    const from = searchParams.get("from")
+    const to = searchParams.get("to")
     const search = searchParams.get("search")
     const mine = searchParams.get("mine") === "true"
 
@@ -36,26 +40,44 @@ export async function GET(request: Request) {
     const currentUserId = session?.user?.id
 
     // Build where clause for filtering
-    const where: any = { deleted: false }
+    const andConditions: any[] = [{ deleted: false }]
     if (mine && currentUserId) {
-      where.userId = currentUserId
+      andConditions.push({ userId: currentUserId })
     }
-    if (gathering && gathering !== "all") {
-      where.gathering = gathering
+    if (groupId && groupId !== "all") {
+      andConditions.push({ groupId })
+    } else if (gathering && gathering !== "all") {
+      andConditions.push({
+        OR: [{ gathering }, { group: { name: gathering } }],
+      })
+    }
+    if (projectId && projectId !== "all") {
+      andConditions.push({ projectId })
+    }
+    if (from || to) {
+      const dateFilter: { date?: { gte?: Date; lte?: Date } } = {}
+      if (from) dateFilter.date = { ...dateFilter.date, gte: new Date(from) }
+      if (to) dateFilter.date = { ...dateFilter.date, lte: new Date(to) }
+      if (dateFilter.date) andConditions.push(dateFilter)
     }
     if (search && search.trim()) {
-      where.OR = [
-        { content: { contains: search, mode: "insensitive" } },
-        { city: { contains: search, mode: "insensitive" } },
-        { gathering: { contains: search, mode: "insensitive" } },
-        { user: { 
-          OR: [
-            { nickname: { contains: search, mode: "insensitive" } },
-            { email: { contains: search, mode: "insensitive" } }
-          ]
-        }}
-      ]
+      andConditions.push({
+        OR: [
+          { content: { contains: search, mode: "insensitive" } },
+          { city: { contains: search, mode: "insensitive" } },
+          { gathering: { contains: search, mode: "insensitive" } },
+          {
+            user: {
+              OR: [
+                { nickname: { contains: search, mode: "insensitive" } },
+                { email: { contains: search, mode: "insensitive" } },
+              ],
+            },
+          },
+        ],
+      })
     }
+    const where = andConditions.length === 1 ? andConditions[0] : { AND: andConditions }
 
     // Get total count for pagination
     const totalCount = await prisma.record.count({ where })
@@ -76,6 +98,18 @@ export async function GET(request: Request) {
             lastName: true,
             city: true,
             country: true,
+          }
+        },
+        group: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        project: {
+          select: {
+            id: true,
+            name: true,
           }
         },
         comments: {
@@ -181,15 +215,42 @@ export async function POST(request: Request) {
       )
     }
 
-    const { date, city, content, gathering, imageUrl } = body
+    const { date, city, content, gathering, groupId: bodyGroupId, projectId: bodyProjectId, imageUrl } = body
     console.log("Received form data:", { date, city, content: content?.substring(0, 50), gathering })
 
     if (!date || !content) {
       throw new ApiError(400, "Date and content are required", ErrorCodes.VALIDATION_ERROR)
     }
 
-    if (!gathering || (typeof gathering === "string" && gathering.trim() === "")) {
-      throw new ApiError(400, "Please select a gathering", ErrorCodes.VALIDATION_ERROR)
+    const groupIdOrGathering = bodyGroupId || gathering
+    if (!groupIdOrGathering || (typeof groupIdOrGathering === "string" && groupIdOrGathering.trim() === "")) {
+      throw new ApiError(400, "Please select a group", ErrorCodes.VALIDATION_ERROR)
+    }
+
+    // Resolve groupId and gathering: prefer groupId, fallback to gathering by name
+    let resolvedGroupId: string | null = null
+    let resolvedGathering: string | null = null
+    if (bodyGroupId && typeof bodyGroupId === "string") {
+      const group = await prisma.group.findUnique({
+        where: { id: bodyGroupId },
+        select: { id: true, name: true },
+      })
+      if (group) {
+        resolvedGroupId = group.id
+        resolvedGathering = group.name
+      }
+    }
+    if (!resolvedGroupId && gathering) {
+      const group = await prisma.group.findFirst({
+        where: { name: sanitizeText(String(gathering).trim()) },
+        select: { id: true, name: true },
+      })
+      if (group) {
+        resolvedGroupId = group.id
+        resolvedGathering = group.name
+      } else {
+        resolvedGathering = typeof gathering === "string" ? sanitizeText(gathering.trim()) : String(gathering)
+      }
     }
 
     // Validate and sanitize content
@@ -202,7 +263,15 @@ export async function POST(request: Request) {
     // Sanitize all user inputs
     const sanitizedContent = sanitizeText(trimmedContent)
     const sanitizedCity = city ? sanitizeText(city.trim()) : ""
-    const sanitizedGathering = typeof gathering === "string" ? sanitizeText(gathering.trim()) : gathering
+
+    let resolvedProjectId: string | null = null
+    if (bodyProjectId && typeof bodyProjectId === "string" && bodyProjectId.trim()) {
+      const project = await prisma.project.findFirst({
+        where: { id: bodyProjectId.trim(), userId: session.user.id },
+        select: { id: true },
+      })
+      if (project) resolvedProjectId = project.id
+    }
 
     try {
       const record = await prisma.record.create({
@@ -210,7 +279,9 @@ export async function POST(request: Request) {
           date: new Date(date),
           city: sanitizedCity,
           content: sanitizedContent,
-          gathering: sanitizedGathering,
+          gathering: resolvedGathering,
+          groupId: resolvedGroupId,
+          projectId: resolvedProjectId,
           imageUrl: imageUrl || null,
           userId: session.user.id,
         },

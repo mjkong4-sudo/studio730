@@ -6,7 +6,6 @@ import { useRouter, useParams } from "next/navigation"
 import Navbar from "@/components/Navbar"
 import Link from "next/link"
 import RecordsFeed from "@/components/RecordsFeed"
-import { getGroupById } from "@/lib/groups"
 
 interface GroupWithStats {
   id: string
@@ -32,8 +31,6 @@ export default function GroupPage() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
-  const staticGroup = getGroupById(groupId)
-
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login")
@@ -44,14 +41,9 @@ export default function GroupPage() {
         router.push("/profile?setup=true")
         return
       }
-      if (!staticGroup) {
-        setNotFound(true)
-        setLoading(false)
-        return
-      }
       fetchGroupWithStats()
     }
-  }, [status, session, router, groupId, staticGroup])
+  }, [status, session, router, groupId])
 
   const fetchGroupWithStats = async () => {
     try {
@@ -74,7 +66,7 @@ export default function GroupPage() {
     }
   }
 
-  if (status === "loading" || (loading && !notFound)) {
+  if (status === "loading" || (loading && !group && !notFound)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC]">
         <Navbar />
@@ -90,7 +82,7 @@ export default function GroupPage() {
 
   if (!session) return null
 
-  if (notFound || !staticGroup) {
+  if (notFound) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC]">
         <Navbar />
@@ -105,7 +97,7 @@ export default function GroupPage() {
     )
   }
 
-  const groupName = group?.name ?? staticGroup.name
+  const groupName = group?.name ?? ""
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F5EC] via-[#FCFAE9] to-[#F5F5EC] relative">
@@ -126,21 +118,27 @@ export default function GroupPage() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-gradient-subtle mb-3">{groupName}</h1>
-                <div className="flex flex-wrap items-center gap-4 text-[#6B8E6A] mb-4">
-                  <span className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    </svg>
-                    {staticGroup.location}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    {staticGroup.day} @ {staticGroup.time}
-                  </span>
-                </div>
-                <p className="text-[#6B8E6A]">{staticGroup.description}</p>
+                {(group?.location || group?.day || group?.time) && (
+                  <div className="flex flex-wrap items-center gap-4 text-[#6B8E6A] mb-4">
+                    {group.location && (
+                      <span className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        </svg>
+                        {group.location}
+                      </span>
+                    )}
+                    {group.day && group.time && (
+                      <span className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {group.day} @ {group.time}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {group?.description && <p className="text-[#6B8E6A]">{group.description}</p>}
                 {group?.stats && (
                   <div className="flex gap-6 mt-6 pt-6 border-t border-[#5C7C5C]/20">
                     <div>
@@ -169,6 +167,7 @@ export default function GroupPage() {
 
         <RecordsFeed
           session={session}
+          groupIdFilter={groupId}
           gatheringFilter={groupName}
           showGatheringFilter={false}
           title={`Records from ${groupName}`}
